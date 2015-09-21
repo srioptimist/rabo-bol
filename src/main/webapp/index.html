@@ -1,0 +1,94 @@
+<!doctype html >
+<html class="no-js" ng-app="app">
+  <head>
+    <link rel="stylesheet" href="styles/main.css">
+  </head>
+  <body ng-controller="openApiController" >
+
+    <div class="content">
+     	Gear up for the Rabobank Open API Hackathon!!!
+    </div>
+
+     <oauth
+   		site="https://hackaton.eu-gb.mybluemix.net/dialog/"
+    	client-id="10ef45cc"
+    	redirect-uri="http://localhost:9080/rabo-bol/index.html"
+    	authorize-path="authorize">
+    </oauth>
+    <div id="wrapper" ng-if="authorized()">
+	   <!--  <div >
+	    	Example for a api secured by api-key ( Get Banks ) </br>
+	    	Enter City Name : <input  ng-model="city" name="accountNumber"  type="text"> 
+	    	<button ng-click="fetchBanks(city)">Click</button>
+	    	<table ng-if="banks">
+	    		<thead>
+	    			<tr>
+	    				<td>Bank Name</td>
+	    				<td>Address</td>
+	    				<td>Postal Code</td>
+	    			</tr>
+	    		</thead>
+	    		<tbody>
+		    		<tr ng-repeat="bank in banks">
+		    			<td>{{bank.name}}</td>
+		    			<td>{{bank.address}}</td>
+		    			<td>{{bank.postalcode}}</td>
+		    		</tr>
+	    		</tbody>
+	    	</table>
+	    </div> -->
+	   
+	    
+	    <div >
+	    
+	    Enter Amount : <input type="number" ng-model="transfer.Amount" name="accountNumber"  type="text"> EUR <br/>
+	    Select From Account : <select ng-click=fetchAccounts() ng-model="transfer.FromAccount" ng-options="account.iban as account.iban for account in accounts">
+					    <option value="">Select Account</option>
+					</select> <br/>
+		BeneficiaryName : <input  ng-model="transfer.BeneficiaryName" name="BeneficiaryName"  type="text">  BeneficiaryAccount : <input  ng-model="transfer.BeneficiaryAccount" name="BeneficiaryAccount"  type="text">
+		
+		
+		<br/>
+		Description : <textarea ng-model="transfer.Description" name="Description" rows="5" cols="25"></textarea>			
+		
+	    <button ng-click="postTransfer()">Transfer</button>
+	    </div>
+	    
+	     <div class="address">
+	    	Addressbook : <button ng-click="fetchAddressBook()">Click</button>
+	    	<table ng-if="showAddress">
+	    		<thead>
+	    			<tr>
+	    				<td>User Name</td>
+	    				<td>Payment Account Number</td>
+	    			</tr>
+	    		</thead>
+	    		<tbody>
+		    		<tr ng-click="setClickedRow($index)" ng-repeat="address in addressess">
+		    			<td>{{address.username}}</td> 
+		    			<td>{{address.iban_payment}}</td>
+		    		</tr>
+	    		</tbody>
+	    	</table>
+	    </div>
+	    
+	    <div class="tincode" ng-if="showValidate">
+	    	Enter Tincode : <input  ng-model="validatetransfer.tincode" name="tincode"  type="text"> <br/>
+	    	<button ng-click="completeTransfer()">Complete Transfer</button>
+	    </div>
+	    
+	    
+    </div>
+
+    <script src="scripts/lib/angular/angular.js"></script>
+    <script src="scripts/lib/angular/ngStorage.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/services/access-token.js"></script>
+    <script src="scripts/services/endpoint.js"></script>
+    <script src="scripts/services/profile.js"></script>
+    <script src="scripts/services/storage.js"></script>
+    <script src="scripts/interceptors/oauth-interceptor.js"></script>
+    <script src="scripts/directives/oauth.js"></script>
+    
+</body>
+</html>
