@@ -32,7 +32,7 @@
 	     <oauth
 	   		site="https://hackaton.eu-gb.mybluemix.net/dialog/"
 	    	client-id="10ef45cc"
-	    	redirect-uri="https://infinite-shelf-8068.herokuapp.com/index.html"
+	    	redirect-uri="http://localhost:9080/rabo-bol/index.html"
 	    	authorize-path="authorize">
 	    </oauth>
 	    </div>
@@ -159,20 +159,20 @@
 						<h4>Price&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		: {{selectedProduct.OfferData.Offers[0].Price}} EUR</h4>
 						<h4>Your current balance in {{accounts[0].iban}} is {{balanceview.ConfiguredAccounts.Account[0].Balance | limitTo:6}} EUR</h4>
 						<p>Enter below information to complete your order. </p>
-						<p><span style="font-size: 15px;color: #cbc750;"> Email&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   : </span><input class="keyword" ng-model="email" name="email"  type="text"></p>
+						<p><span style="font-size: 15px;color: #cbc750;"> Email&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   : </span><input class="keyword" ng-model="mailDetails.emailId" name="email"  type="text"></p>
 						<p><span style="font-size: 15px;color: #cbc750;"> Mobile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   : </span><input class="keyword" ng-model="mobile" name="mobile"  type="number"></p>
 						<p><span style="font-size: 15px;color: #cbc750;"> Tincode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </span><input class="keyword"  ng-model="validatetransfer.tincode" name="tincode"  type="password"></p>
 						<div  class="tincode">
 				    		<input ng-model="validatetransfer.emiNeeded" name="EMI"  type="checkbox" />&nbsp;&nbsp;I want to make an EMI<br/><br/>
 				    	</div>
 					    <div class="tincode" ng-show="showEmiPage()">
-					    	<p><span style="font-size: 15px;color: #cbc750;"> EMI Amount   : </span><input  ng-model="validatetransfer.emiAmount" name="EmiAmount" ng-keyup="getNumberOfTransactions()" type="text"></p>
+					    	<p><span style="font-size: 15px;color: #cbc750;"> EMI Amount   : </span><input  ng-model="validatetransfer.emiAmount" name="EmiAmount" ng-keyup="getNumberOfTransactions()" type="number"></p>
 							<!-- <div><h4>EMI Amount: </h4> <input  ng-model="validatetransfer.emiAmount" name="EmiAmount" ng-keyup="getNumberOfTransactions()" type="text"></div>  -->
 							<p ng-show="isEmiAmountEntered()">You will pay in {{validatetransfer.noOfTransactions}} Months.</p>
 							<!-- <div ng-show="isEmiAmountEntered()"><h2>You will pay in {{validatetransfer.noOfTransactions}} Months.</h2></div>  -->
 							<div><input ng-model="validatetransfer.agreed" name="acceptTerms"  type="checkbox" />&nbsp;&nbsp;I Agree to the terms and conditions<br/><br/></div>
 						</div>
-						<button type="button" class="btn btn-default get" ng-click="completeTransfer()">Complete Transfer</button>
+						<button type="button" class="btn btn-default get" ng-disabled="!allowTransfer()" ng-click="completeTransfer()">Complete Transfer</button>
 					</div>
 			</div>
 		</div>

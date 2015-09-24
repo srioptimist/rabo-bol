@@ -48,6 +48,11 @@ angular.module('app').controller("openApiController",['$scope','$http','$locatio
 			    "Urgent": true
 			};
 	
+	$scope.mailDetails = {
+		"emailId" : "",	
+		"content" : ""
+	};
+	
 	$scope.selectedBook = {
 		    "Amount": 0,
 		    "Currency": "EUR",
@@ -371,61 +376,221 @@ $scope.showEmiDetail = function(){
 		  $scope.showBooks = true;
 		  $scope.books = null;
 		  $scope.showResult = false;
+		  $scope.validatetransfer.tincode = "";
+		  $scope.validatetransfer.emiAmount = "";
+		  $scope.validatetransfer.agreed = false;
+		  $scope.validatetransfer.emiNeeded = false;
+	}
+	
+	$scope.allowTransfer = function () {
+		
+		var allow = false;
+		
+		if($scope.validatetransfer.tincode == null){
+			allow =  false;
+		}
+		
+		if(!$scope.validatetransfer.emiNeeded  && $scope.validatetransfer.tincode.length > 0){
+			allow =  true;
+		}
+		
+		if($scope.validatetransfer.emiNeeded && !$scope.validatetransfer.agreed){
+			allow =  false;
+		}
+		
+		if($scope.validatetransfer.emiNeeded && $scope.validatetransfer.agreed){
+			allow =  true;
+		}
+		
+		
+		
+		return allow;
 	}
 	
 	$scope.completeTransfer = function(){	
-		$scope.validatetransfer.transactionkey= $scope.transactionKey;
-		var req = {
-				 method: 'PUT',
-				 url: 'https://hackaton.eu-gb.mybluemix.net:443/api/transfer?api_key=10ef45cc',
-				 headers: {
-				   'Content-Type': 'application/json', 
-				   'Authorization': 'Bearer ' + AccessToken.get().access_token
-				 },
-				 data:  $scope.validatetransfer 
-				}
+		
+		if($scope.isEmiAmountEntered()) {
+			
+			$scope.selectedBook.Amount = $scope.validatetransfer.emiAmount;
+			
+				var req = {
+						 method: 'POST',
+						 url: 'https://hackaton.eu-gb.mybluemix.net:443/api/transfer?api_key=10ef45cc',
+						 headers: {
+						   'Content-Type': 'application/json', 
+						   'Authorization': 'Bearer ' + AccessToken.get().access_token
+						 },
+						 data:  $scope.selectedBook 
+						}
+				
+				
+				$http(req).
+				  then(function(response) {
+					  	$scope.transactionKey = response.data.transactionkey;
+					  	$scope.showValidate = true;
+					  	$scope.validatetransfer.transactionkey= $scope.transactionKey;
+						var req = {
+								 method: 'PUT',
+								 url: 'https://hackaton.eu-gb.mybluemix.net:443/api/transfer?api_key=10ef45cc',
+								 headers: {
+								   'Content-Type': 'application/json', 
+								   'Authorization': 'Bearer ' + AccessToken.get().access_token
+								 },
+								 data:  $scope.validatetransfer 
+								}
+						
+						
+						$http(req).
+						  then(function(response) {
+							  $scope.showValidate = false;
+							  $scope.showBooks = false;
+							  
+							  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/balanceview?api_key=10ef45cc",{ headers: headers() })
+							    .success(
+							    			function(response) {
+							    				$scope.balanceview = response;
+							    				$scope.searched = true;
+							    			}
+							    ).error( function(data, status){
+							    }
+							    		);
+							  
+							  
+							  $scope.mailDetails.content = "<h1>Congrats your order is placed, find the order confirmation below</h2><br/>Transaction id : "+ $scope.transactionKey+"<br/>Price :"+  $scope.selectedProduct.OfferData.Offers[0].Price+" EUR<br/><p>Description : "+ $scope.selectedProduct.LongDescription+" </p><br/>Your remaining balance in "+  $scope.accounts[0].iban+" is " +  $scope.balanceview.ConfiguredAccounts.Account[0].Balance +" EUR<br/>"; 
+							  
+							  var req = {
+										 method: 'POST',
+										 url: 'rest/email',
+										 headers: {
+										   'Content-Type': 'application/json', 
+										   'Authorization': 'Bearer ' + AccessToken.get().access_token
+										 },
+										 data:  $scope.mailDetails
+										}
+								
+								
+								$http(req).
+								  then(function(response) {
+									  	$scope.transactionKey = response.data.transactionkey;
+									  	$scope.showValidate = true;
+									  }, function(response) {
+										  alert(response.data.errors[0].message);
+										  //$scope.showValidate = true;
+									  });
+							  
+							  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/transaction/latest?api_key=10ef45cc",{ headers: headers() })
+							    .success(
+							    			function(response) {
+							    				$scope.transactions = response;
+											  	var  j =0;
+											  	for (var i = 0; i < $scope.transactions.length; i++) {
+											  		if($scope.transactions[i].transactionDescription.indexOf("From RABO-BOL") > -1){
+											  			$scope.raboTransactions[j]=$scope.transactions[i];
+											  			j++;
+											  		}
+											  	}
+											  	
+											  	for (var x = 0; x < $scope.raboTransactions.length; x++) {
+											  		$scope.raboTransactions[x].transactionDescription=$scope.transactions[x].transactionDescription.replace(/From RABO-BOL/g, '');;
+											  	}
+							    			}
+							    ).error( function(data, status){
+							    	alert(response.data.errors[0].message);
+							    }
+							    		);
+							  
+							  $scope.showResult = true;
+							  }, function(response) {
+								  alert(response.data.errors[0].message);
+							  });
+					  }, function(response) {
+						  alert(response.data.errors[0].message);
+						  //$scope.showValidate = true;
+					  });
+			
+			
+		} else {
+			$scope.validatetransfer.transactionkey= $scope.transactionKey;
+			var req = {
+					 method: 'PUT',
+					 url: 'https://hackaton.eu-gb.mybluemix.net:443/api/transfer?api_key=10ef45cc',
+					 headers: {
+					   'Content-Type': 'application/json', 
+					   'Authorization': 'Bearer ' + AccessToken.get().access_token
+					 },
+					 data:  $scope.validatetransfer 
+					}
+			
+			
+			$http(req).
+			  then(function(response) {
+				  $scope.showValidate = false;
+				  $scope.showBooks = false;
+				  
+				  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/balanceview?api_key=10ef45cc",{ headers: headers() })
+				    .success(
+				    			function(response) {
+				    				$scope.balanceview = response;
+				    				$scope.searched = true;
+				    			}
+				    ).error( function(data, status){
+				    }
+				    		);
+				  
+				  
+				  $scope.mailDetails.content = "<h1>Congrats your order is placed, find the order confirmation below</h2><br/>Transaction id : "+ $scope.transactionKey+"<br/>Price :"+  $scope.selectedProduct.OfferData.Offers[0].Price+" EUR<br/><p>Description : "+ $scope.selectedProduct.LongDescription+" </p><br/>Your remaining balance in "+  $scope.accounts[0].iban+" is " +  $scope.balanceview.ConfiguredAccounts.Account[0].Balance +" EUR<br/>"; 
+				  
+				  var req = {
+							 method: 'POST',
+							 url: 'rest/email',
+							 headers: {
+							   'Content-Type': 'application/json', 
+							   'Authorization': 'Bearer ' + AccessToken.get().access_token
+							 },
+							 data:  $scope.mailDetails
+							}
+					
+					
+					$http(req).
+					  then(function(response) {
+						  	$scope.transactionKey = response.data.transactionkey;
+						  	$scope.showValidate = true;
+						  }, function(response) {
+							  alert(response.data.errors[0].message);
+							  //$scope.showValidate = true;
+						  });
+				  
+				  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/transaction/latest?api_key=10ef45cc",{ headers: headers() })
+				    .success(
+				    			function(response) {
+				    				$scope.transactions = response;
+								  	var  j =0;
+								  	for (var i = 0; i < $scope.transactions.length; i++) {
+								  		if($scope.transactions[i].transactionDescription.indexOf("From RABO-BOL") > -1){
+								  			$scope.raboTransactions[j]=$scope.transactions[i];
+								  			j++;
+								  		}
+								  	}
+								  	
+								  	for (var x = 0; x < $scope.raboTransactions.length; x++) {
+								  		$scope.raboTransactions[x].transactionDescription=$scope.transactions[x].transactionDescription.replace(/From RABO-BOL/g, '');;
+								  	}
+				    			}
+				    ).error( function(data, status){
+				    	alert(response.data.errors[0].message);
+				    }
+				    		);
+				  
+				  $scope.showResult = true;
+				  }, function(response) {
+					  alert(response.data.errors[0].message);
+				  });
+		}
+			
+			
+			
 		
 		
-		$http(req).
-		  then(function(response) {
-			  $scope.showValidate = false;
-			  $scope.showBooks = false;
-			  
-			  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/balanceview?api_key=10ef45cc",{ headers: headers() })
-			    .success(
-			    			function(response) {
-			    				$scope.balanceview = response;
-			    				$scope.searched = true;
-			    			}
-			    ).error( function(data, status){
-			    }
-			    		);
-			  
-			  $http.get("https://hackaton.eu-gb.mybluemix.net:443/api/transaction/latest?api_key=10ef45cc",{ headers: headers() })
-			    .success(
-			    			function(response) {
-			    				$scope.transactions = response;
-							  	var  j =0;
-							  	for (var i = 0; i < $scope.transactions.length; i++) {
-							  		if($scope.transactions[i].transactionDescription.indexOf("From RABO-BOL") > -1){
-							  			$scope.raboTransactions[j]=$scope.transactions[i];
-							  			j++;
-							  		}
-							  	}
-							  	
-							  	for (var x = 0; x < $scope.raboTransactions.length; x++) {
-							  		$scope.raboTransactions[x].transactionDescription=$scope.transactions[x].transactionDescription.replace(/From RABO-BOL/g, '');;
-							  	}
-			    			}
-			    ).error( function(data, status){
-			    	alert(response.data.errors[0].message);
-			    }
-			    		);
-			  
-			  $scope.showResult = true;
-			  }, function(response) {
-				  alert(response.data.errors[0].message);
-			  });
 	};
 	
 }]);

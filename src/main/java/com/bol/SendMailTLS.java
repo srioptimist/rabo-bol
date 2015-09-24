@@ -1,5 +1,6 @@
 package com.bol;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -9,16 +10,30 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+@Path("/email")
 public class SendMailTLS {
-
-	public static void main(String[] args) {
-		
-		//sendMessage();
+	
+	@POST
+    @Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+    public Response getTopSellers(MailDetails maildetails) throws JsonParseException, JsonMappingException, IOException {
 
 		final String username = "sharpcookies2015@gmail.com";
 		final String password = "password123$";
-
+		
+		System.out.println("To : " + maildetails.getEmailId());
+		System.out.println("Content : " + maildetails.getContent());
+		
 		Properties props = new Properties();
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.starttls.enable", "true");
@@ -37,10 +52,9 @@ public class SendMailTLS {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress("sharpcookies2015@gmail.com"));
 			message.setRecipients(Message.RecipientType.TO,
-				InternetAddress.parse("sharpcookies2015@gmail.com"));
+				InternetAddress.parse(maildetails.getEmailId()));
 			message.setSubject("Testing Subject");
-			message.setText("Dear Mail Crawler,"
-				+ "\n\n No spam to my email, please!");
+			message.setText(maildetails.getContent());
 
 			Transport.send(message);
 
@@ -48,8 +62,13 @@ public class SendMailTLS {
 
 		} catch (MessagingException e) {
 			e.printStackTrace();
-			throw new RuntimeException(e);
+			//throw new RuntimeException(e);
 		}
-	}
+		
+		
+        return Response.status(Response.Status.OK).entity("OK").build();
+
+    }
+
 	
 }
