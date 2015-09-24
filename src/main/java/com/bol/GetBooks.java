@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.bol.api.openapi_4_0.ListResults;
 import com.bol.api.openapi_4_0.SearchResults;
 import com.bol.openapi.OpenApiClient;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -25,6 +26,16 @@ public class GetBooks {
         final String apiKey = "DE29770CFA144BA79FFEAC24002E1D66";
         OpenApiClient client = OpenApiClient.withDefaultClient(apiKey);
         SearchResults results = client.searchBuilder().term(keyWord).term("boek").search();
+        return Response.status(Response.Status.OK).entity(results).build();
+
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTopSellers() throws JsonParseException, JsonMappingException, IOException {
+        final String apiKey = "DE29770CFA144BA79FFEAC24002E1D66";
+        OpenApiClient client = OpenApiClient.withDefaultClient(apiKey);
+        ListResults results = client.listBuilder().defaultTopSelling().list();
         return Response.status(Response.Status.OK).entity(results).build();
 
     }
