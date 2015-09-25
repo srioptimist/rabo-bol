@@ -53,8 +53,9 @@ public class SendMailTLS {
 			message.setFrom(new InternetAddress("sharpcookies2015@gmail.com"));
 			message.setRecipients(Message.RecipientType.TO,
 				InternetAddress.parse(maildetails.getEmailId()));
-			message.setSubject("Testing Subject");
-			message.setText(maildetails.getContent());
+			message.setSubject("RaboShop order confirmation");
+			//message.setText(maildetails.getContent());
+			message.setContent(maildetails.getContent(), "text/html"); 
 
 			Transport.send(message);
 

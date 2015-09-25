@@ -456,7 +456,7 @@ $scope.showEmiDetail = function(){
 							    		);
 							  
 							  
-							  $scope.mailDetails.content = "<h1>Congrats your order is placed, find the order confirmation below</h2><br/>Transaction id : "+ $scope.transactionKey+"<br/>Price :"+  $scope.selectedProduct.OfferData.Offers[0].Price+" EUR<br/><p>Description : "+ $scope.selectedProduct.LongDescription+" </p><br/>Your remaining balance in "+  $scope.accounts[0].iban+" is " +  $scope.balanceview.ConfiguredAccounts.Account[0].Balance +" EUR<br/>"; 
+							  $scope.mailDetails.content = "<h2>Congrats your order is placed, find the order confirmation below</h2><br/><h4>Transaction id : "+ $scope.transactionKey+"<br/>Price :"+  $scope.selectedProduct.OfferData.Offers[0].Price+" EUR<br/><p>Description : "+ $scope.selectedProduct.LongDescription+" </p><br/>Your remaining balance in "+  $scope.accounts[0].iban+" is " +  $scope.balanceview.ConfiguredAccounts.Account[0].Balance +" EUR<br/></h4>"; 
 							  
 							  var req = {
 										 method: 'POST',
